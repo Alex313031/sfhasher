@@ -1,0 +1,29 @@
+# Copyright 2025 Alex313031
+
+group("sfhasher") {
+  public_deps = [
+    ":sfhash",
+  ]
+}
+
+executable("sfhash") {
+  configs -= [ "//build/config/win:console_subsystem" ]
+  configs += [
+    "//build/config/win:windowed_subsystem",
+    ":sfhash_config",
+  ]
+  sources = [
+    "src/sfhasher.cc",
+    "src/sfhasher.h",
+    "src/framework.h",
+    "src/resource.h",
+    "src/resource.rc",
+    "src/version.h",
+  ]
+}
+
+config("sfhash_config") {
+  include_dirs = [
+    "src",
+  ]
+}
