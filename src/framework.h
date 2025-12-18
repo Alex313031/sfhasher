@@ -22,7 +22,10 @@
 #include <tchar.h> // For TCHAR, and automatically deducing wchar_t type
 
 // C++ STL Headers
+#include <cstdint>
 #include <iostream>
+#include <iomanip>
 #include <string>
+#include <sstream>
 
 #endif // SFHASHER_FRAMEWORK_H_

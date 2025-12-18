@@ -1,8 +1,16 @@
 #include "sfhasher.h"
 
 #include "framework.h"
+#include "hash.h"
 
 HINSTANCE hInst;
+HWND hMainWnd;
+
+HWND hInputEdit;
+HWND hOutputEdit;
+
+HWND hHashButton;
+HWND hAboutButton;
 
 // The main entry point, equivalent to int main()
 int APIENTRY wWinMain(HINSTANCE hInstance,
@@ -88,39 +96,37 @@ ATOM RegisterWndClass(HINSTANCE hInstance) {
 
 // Saves global instance handle and creates the main window.
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow) {
-  bool success; // 
+  bool success = false; // 
   hInst = hInstance; // Store instance handle in our global variable
 
   // The all important Win32 function that every GUI app must have to create
   // the Window.
-  HWND hWnd = CreateWindowW(szWindowClass,
+  hMainWnd = CreateWindowW(szWindowClass,
                             szTitle,
                             WS_OVERLAPPEDWINDOW,
                             CW_USEDEFAULT,
-                            0,
                             CW_USEDEFAULT,
-                            0,
+                            DEFAULT_WIDTH,
+                            DEFAULT_HEIGHT,
                             nullptr,
                             nullptr,
                             hInstance,
                             nullptr);
 
   // Early fail if we can't create the window.
-  if (!hWnd) {
+  if (!hMainWnd) {
     success = false;
   } else {
     // Actually show the window (or hide it).
-    success = ShowWindow(hWnd, nCmdShow);
-
+    ShowWindow(hMainWnd, nCmdShow);
+    // Initialize controls
+    InitControls(hMainWnd);
     // If we showed the window, now the status will be set 
-    if (success) {
-      // Sucessfully created the window
-      success = UpdateWindow(hWnd); // Start painting by sending the WM_PAINT message
-    }
+    // Sucessfully created the window
+    success = UpdateWindow(hMainWnd); // Start painting by sending the WM_PAINT message
   }
-
   
-  return true;
+  return success;
 }
 
 //  Processes window messages for the main window.
@@ -137,13 +143,19 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
       // Parse the menu selections:
       switch (wmId) {
         case IDM_ABOUT:
+        case IDC_ABOUT_BUTTON:
           // Show "About" dialog box
-          DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, AboutDlgProc);
+          HandleAbout(hWnd);
+          break;
+        case IDM_REFRESH:
+          RefreshControls(hWnd);
           break;
         case IDM_EXIT:
           // Send WM_DESTROY message to close window 
           DestroyWindow(hWnd);
           break;
+        case IDC_HASH_BUTTON:
+          HandleHash(hWnd);
         default:
           return DefWindowProc(hWnd, message, wParam, lParam);
       }
@@ -181,6 +193,81 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
       return DefWindowProc(hWnd, message, wParam, lParam);
   }
   return 0;
+}
+
+void InitControls(HWND hWnd) {
+  if (hWnd != nullptr) {
+    hInputEdit = CreateWindowExW(
+        WS_EX_CLIENTEDGE, WC_EDIT, L"input",
+        WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | WS_TABSTOP,
+        STATIC_LEFT,
+        STATIC_TOP,
+        EDIT_WIDTH - STATIC_LEFT,
+        EDIT_HEIGHT,
+        hWnd, (HMENU)IDC_INPUT, hInst, nullptr
+    );
+    hOutputEdit = CreateWindowExW(
+        WS_EX_CLIENTEDGE, WC_EDIT, L"output",
+        WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | WS_TABSTOP,
+        STATIC_LEFT,
+        STATIC_TOP + EDIT_HEIGHT + INTRA_PADDING,
+        EDIT_WIDTH - STATIC_LEFT,
+        EDIT_HEIGHT,
+        hWnd, (HMENU)IDC_INPUT, hInst, nullptr
+    );
+    hHashButton = CreateWindowExW(
+        0, WC_BUTTON, L"Hash!",
+        WS_CHILD | WS_VISIBLE | WS_TABSTOP,
+        EDIT_WIDTH + STATIC_LEFT + INTRA_PADDING,
+        STATIC_TOP + (EDIT_HEIGHT / 2),
+        BUTTON_WIDTH,
+        BUTTON_HEIGHT,
+        hWnd, (HMENU)IDC_HASH_BUTTON, hInst, nullptr
+    );
+    hAboutButton = CreateWindowExW(
+        0, WC_BUTTON, L"About",
+        WS_CHILD | WS_VISIBLE | WS_TABSTOP,
+        EDIT_WIDTH + STATIC_LEFT + INTRA_PADDING,
+        STATIC_TOP + BUTTON_HEIGHT + INTRA_PADDING + EDIT_HEIGHT + INTRA_PADDING,
+        BUTTON_WIDTH,
+        BUTTON_HEIGHT,
+        hWnd, (HMENU)IDC_ABOUT_BUTTON, hInst, nullptr
+    );
+  } else {
+    return;
+  }
+}
+
+void HandleHash(HWND hWnd) {
+  DWORD dwInputSize = GetWindowTextLength(hInputEdit);
+  const bool is_empty = (BOOL)(dwInputSize == 0);
+  if (is_empty) {
+    MessageBoxW(hWnd, L"No input!    ", L"Empty Input", MB_OK | MB_ICONWARNING);
+  } else {
+    static std::wstring kHashInput;
+    std::wostringstream wostr;
+    wchar_t* input_buff = new wchar_t[dwInputSize + 1];
+    GetWindowTextW(hInputEdit, input_buff, dwInputSize + 1);
+    wostr << std::fixed << std::setprecision(MAX_LOADSTRING) << input_buff;
+    kHashInput = wostr.str();
+    const std::wstring kHashOutput = SimpleW(kHashInput);
+    std::wcout << "kHashInput = " << kHashInput << std::endl;
+    std::wcout << "kHashOutput = " << kHashOutput << std::endl;
+    SetWindowTextW(hOutputEdit, kHashOutput.c_str());
+  }
+}
+
+void RefreshControls(HWND hWnd) {
+  if (hWnd != nullptr) {
+    SetWindowTextW(hInputEdit, kBlank);
+    SetWindowTextW(hOutputEdit, kBlank);
+  } else {
+    return;
+  }
+}
+
+void HandleAbout(HWND hWnd) {
+  DialogBoxW(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, AboutDlgProc);
 }
 
 // Processes window messages for the "About" dialog box window procedure.

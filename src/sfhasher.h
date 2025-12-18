@@ -14,6 +14,19 @@
 
 /* Global Variables */
 
+constexpr unsigned int DEFAULT_WIDTH = 300;
+constexpr unsigned int DEFAULT_HEIGHT = 200;
+constexpr unsigned int STATIC_LEFT = 12;
+constexpr unsigned int STATIC_TOP = 12;
+constexpr unsigned int INTRA_PADDING = 6;
+
+constexpr unsigned int EDIT_WIDTH = 200;
+constexpr unsigned int EDIT_HEIGHT = 24;
+constexpr unsigned int BUTTON_WIDTH = 50;
+constexpr unsigned int BUTTON_HEIGHT = EDIT_HEIGHT;
+
+const LPCWSTR kBlank = L"";
+
 // current instance
 extern HINSTANCE hInst;
 
@@ -38,6 +51,16 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow);
 
 // Window procedure function https://learn.microsoft.com/en-us/windows/win32/api/winuser/nc-winuser-wndproc
 static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+
+// Initializes input boxes, static labels, buttons, etc.
+void InitControls(HWND hWnd);
+
+// Refreshes controls as needed
+void RefreshControls(HWND hWnd);
+
+void HandleHash(HWND hWnd);
+
+void HandleAbout(HWND hWnd);
 
 // Message handler for the "About" dialog box.
 INT_PTR CALLBACK AboutDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
