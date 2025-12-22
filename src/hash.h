@@ -3,11 +3,16 @@
 
 #include "framework.h"
 
-#include <random>
+#include "superfasthash.h"
+#include "xxhash32.h"
 
 static constexpr wchar_t kOutChars[] = L"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 static constexpr size_t  kOutCharsSize = 36;
 
-std::wstring SimpleW(const std::wstring& input);
+std::wstring SimpleMersenneW(const std::wstring& input);
+
+std::wstring SFHashW(const std::wstring& input);
+
+std::wstring XXHashW(const std::wstring& input);
 
 #endif // SFHASHER_HASH_H_

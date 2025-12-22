@@ -21,8 +21,10 @@
 // Controls
 #define IDC_MAINMENU                300
 #define IDC_INPUT                   301
-#define IDC_HASH_BUTTON             302
-#define IDC_ABOUT_BUTTON            303
+#define IDC_SFOUT                   302
+#define IDC_XXOUT                   303
+#define IDC_HASH_BUTTON             304
+#define IDC_ABOUT_BUTTON            305
 
 // Main application resource
 #define IDR_MAINFRAME               128

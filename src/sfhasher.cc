@@ -7,7 +7,9 @@ HINSTANCE hInst;
 HWND hMainWnd;
 
 HWND hInputEdit;
-HWND hOutputEdit;
+HWND hInputFileEdit;
+HWND hOutSFHashEdit;
+HWND hOutXXHashEdit;
 
 HWND hHashButton;
 HWND hAboutButton;
@@ -196,34 +198,49 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 }
 
 void InitControls(HWND hWnd) {
+  unsigned int kTop = STATIC_TOP;
+  unsigned int kButTop = STATIC_TOP + BUTTON_HEIGHT;
   if (hWnd != nullptr) {
     hInputEdit = CreateWindowExW(
         WS_EX_CLIENTEDGE, WC_EDIT, L"input",
         WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | WS_TABSTOP,
         STATIC_LEFT,
-        STATIC_TOP,
+        kTop,
         EDIT_WIDTH - STATIC_LEFT,
         EDIT_HEIGHT,
         hWnd, (HMENU)IDC_INPUT, hInst, nullptr
     );
-    hOutputEdit = CreateWindowExW(
-        WS_EX_CLIENTEDGE, WC_EDIT, L"output",
+    kTop = STATIC_TOP + EDIT_HEIGHT + INTRA_PADDING;
+    hOutSFHashEdit = CreateWindowExW(
+        WS_EX_CLIENTEDGE, WC_EDIT, L"Super Fast Hash",
         WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | WS_TABSTOP,
         STATIC_LEFT,
-        STATIC_TOP + EDIT_HEIGHT + INTRA_PADDING,
+        kTop,
         EDIT_WIDTH - STATIC_LEFT,
         EDIT_HEIGHT,
-        hWnd, (HMENU)IDC_INPUT, hInst, nullptr
+        hWnd, (HMENU)IDC_SFOUT, hInst, nullptr
     );
+    kTop = kTop + EDIT_HEIGHT + INTRA_PADDING;
+    hOutXXHashEdit = CreateWindowExW(
+        WS_EX_CLIENTEDGE, WC_EDIT, L"XX Hash",
+        WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | WS_TABSTOP,
+        STATIC_LEFT,
+        kTop,
+        EDIT_WIDTH - STATIC_LEFT,
+        EDIT_HEIGHT,
+        hWnd, (HMENU)IDC_XXOUT, hInst, nullptr
+    );
+    // Buttons
     hHashButton = CreateWindowExW(
         0, WC_BUTTON, L"Hash!",
         WS_CHILD | WS_VISIBLE | WS_TABSTOP,
         EDIT_WIDTH + STATIC_LEFT + INTRA_PADDING,
-        STATIC_TOP + (EDIT_HEIGHT / 2),
+        STATIC_TOP + (EDIT_HEIGHT / 2), // Manually position between
         BUTTON_WIDTH,
         BUTTON_HEIGHT,
         hWnd, (HMENU)IDC_HASH_BUTTON, hInst, nullptr
     );
+    kButTop = kButTop + INTRA_PADDING + EDIT_HEIGHT + INTRA_PADDING;
     hAboutButton = CreateWindowExW(
         0, WC_BUTTON, L"About",
         WS_CHILD | WS_VISIBLE | WS_TABSTOP,
@@ -250,17 +267,18 @@ void HandleHash(HWND hWnd) {
     GetWindowTextW(hInputEdit, input_buff, dwInputSize + 1);
     wostr << std::fixed << std::setprecision(MAX_LOADSTRING) << input_buff;
     kHashInput = wostr.str();
-    const std::wstring kHashOutput = SimpleW(kHashInput);
+    const std::wstring kHashOutput = SimpleMersenneW(kHashInput);
     std::wcout << "kHashInput = " << kHashInput << std::endl;
     std::wcout << "kHashOutput = " << kHashOutput << std::endl;
-    SetWindowTextW(hOutputEdit, kHashOutput.c_str());
+    SetWindowTextW(hOutSFHashEdit, kHashOutput.c_str());
   }
 }
 
 void RefreshControls(HWND hWnd) {
   if (hWnd != nullptr) {
     SetWindowTextW(hInputEdit, kBlank);
-    SetWindowTextW(hOutputEdit, kBlank);
+    SetWindowTextW(hOutSFHashEdit, kBlank);
+    SetWindowTextW(hOutXXHashEdit, kBlank);
   } else {
     return;
   }

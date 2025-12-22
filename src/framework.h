@@ -20,6 +20,7 @@
 
 // C Runtime Headers
 #include <tchar.h> // For TCHAR, and automatically deducing wchar_t type
+#include <stdio.h> // for NULL
 
 // C++ STL Headers
 #include <cstdint>

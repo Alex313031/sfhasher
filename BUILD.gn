@@ -20,10 +20,27 @@ executable("sfhash") {
     "src/resource.rc",
     "src/version.h",
   ]
+  public_deps = [
+    ":libhash"
+  ]
 }
 
 config("sfhash_config") {
   include_dirs = [
     "src",
+  ]
+}
+
+static_library("libhash") {
+  configs += [ ":sfhash_config", ]
+  sources = [
+    "src/hash.cc",
+    "src/hash.h",
+    "src/superfasthash.cc",
+    "src/superfasthash.h",
+    "src/xxhash32.cc",
+    "src/xxhash32.h",
+    "src/framework.h",
+    "src/version.h",
   ]
 }
